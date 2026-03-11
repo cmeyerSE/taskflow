@@ -1,0 +1,15 @@
+current directory: /home/corym/projects/taskflow/backend/vendor/bundle/ruby/3.0.0/gems/racc-1.8.1/ext/racc/cparse
+/usr/bin/ruby3.0 -I /usr/lib/ruby/vendor_ruby -r ./siteconf20260310-14255-6gn0je.rb extconf.rb
+creating Makefile
+
+current directory: /home/corym/projects/taskflow/backend/vendor/bundle/ruby/3.0.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= clean
+
+current directory: /home/corym/projects/taskflow/backend/vendor/bundle/ruby/3.0.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\=
+compiling cparse.c
+linking shared-object racc/cparse.so
+
+current directory: /home/corym/projects/taskflow/backend/vendor/bundle/ruby/3.0.0/gems/racc-1.8.1/ext/racc/cparse
+make DESTDIR\= install
+/usr/bin/install -c -m 0755 cparse.so ./.gem.20260310-14255-vn7860/racc

@@ -8,4 +8,27 @@ export const fetchTasks = async () => {
     }
 
     return response.json()
+};
+
+export const createTask = async (task: {
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    due_date?: string;
+    user_id?: number;
+}) => {
+    const response = await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(task),
+    });
+
+    if (!response.ok) {
+        throw new Error("Failed to create task");
+    }
+
+    return response.json();
 }

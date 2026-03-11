@@ -1,51 +1,76 @@
 import { useEffect, useState } from "react"
-import { fetchTasks } from "../services/taskService"
+import TaskForm from "../components/TaskForm";
+import { createTask, fetchTasks } from "../services/taskService"
 
 type Task = {
-    id: number
-    title: string
-    description: string
-    status: string
-    priority: string
-    dueDate: string
+  id: number
+  title: string
+  description: string
+  status: string
+  priority: string
+  due_date?: string
 }
 
 export default function Dashboard() {
-    const [tasks, setTasks] = useState<Task[]>([])
-    const [error, setError] = useState("")
+  const [tasks, setTasks] = useState<Task[]>([])
 
-    useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const data = await fetchTasks()
-        console.log("Fetched tasks:", data)
-        setTasks(data)
-      } catch (err) {
-        console.error(err)
-        setError("Failed to load tasks")
-      }
-    }
-
+  useEffect(() => {
     loadTasks()
   }, [])
 
+  const loadTasks = async () => {
+    try {
+      const data = await fetchTasks()
+      setTasks(data)
+    } catch (error) {
+      console.error("Error loading tasks:", error)
+    }
+  };
+
+  const handleCreateTask = async (taskData: {
+    title: string;
+    description: string;
+    status: string;
+    priority: string;
+    due_date?: string;
+    user_id?: number;
+  }) => {
+    const newTask = await createTask(taskData);
+    setTasks((prevTasks) => [newTask, ...prevTasks]);
+  };
+
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>TaskFlow Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-10">
+      <h1 className="text-3xl font-bold mb-8">TaskFlow Dashboard</h1>
 
-      {error && <p>{error}</p>}
+      <TaskForm onCreateTask={handleCreateTask} />
 
-      {tasks.length === 0 && !error && <p>No tasks found.</p>}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className="bg-white rounded-lg shadow p-5 hover:shadow-lg transition"
+          >
+            <h3 className="text-lg font-semibold mb-2">{task.title}</h3>
 
-      {tasks.map((task) => (
-        <div key={task.id} style={{ marginBottom: "1rem" }}>
-          <h3>{task.title}</h3>
-          <p>{task.description}</p>
-          <small>
-            {task.status} • {task.priority}
-          </small>
-        </div>
-      ))}
+            <p className="text-gray-600 mb-4">{task.description}</p>
+
+            <div className="flex justify-between text-sm">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded">
+                {task.status}
+              </span>
+
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded">
+                {task.priority}
+              </span>
+            </div>
+
+            {task.due_date && (
+              <p className="text-sm text-gray-500">Due: {task.due_date}</p>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
