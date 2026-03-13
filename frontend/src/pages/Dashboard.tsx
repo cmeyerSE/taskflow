@@ -1,11 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  DndContext,
+  PointerSensor,
+  closestCorners,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import type { DragEndEvent } from "@dnd-kit/core/dist/types";
 import TaskForm from "../components/TaskForm";
+import KanbanColumn from "../components/KanbanColumn";
 import {
   createTask,
   deleteTask,
   fetchTasks,
   updateTask,
 } from "../services/taskService";
+
+type TaskStatus = "todo" | "in_progress" | "done";
 
 type Task = {
   id: number;
@@ -57,100 +68,106 @@ export default function Dashboard() {
     }
   };
 
-  const handleStatusChange = async (
-    id: number,
-    newStatus: "todo" | "in_progress" | "done"
-  ) => {
+  const todoTasks = useMemo(
+    () => tasks.filter((task) => task.status === "todo"),
+    [tasks]
+  );
+  const inProgressTasks = useMemo(
+    () => tasks.filter((task) => task.status === "in_progress"),
+    [tasks]
+  );
+  const doneTasks = useMemo(
+    () => tasks.filter((task) => task.status === "done"),
+    [tasks]
+  );
+
+  const findTaskById = (id: string) =>
+    tasks.find((task) => task.id.toString() === id);
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over) return;
+    
+    const activeTask = findTaskById(active.id.toString());
+    if (!activeTask) return;
+
+    const overId =  over.id.toString();
+
+    let newStatus: TaskStatus | null = null;
+
+    if  (overId === "todo" || overId === "in_progress" || overId === "done") {
+      newStatus = overId as TaskStatus;
+    } else {
+      const overTask = findTaskById(overId);
+      if (overTask) {
+        newStatus = overTask.status as TaskStatus;
+      }
+    }
+
+    if (!newStatus || activeTask.status === newStatus) return;
+
+    const previousStatus = tasks;
+
+    const updatedTasks = tasks.map((task) =>
+      task.id === activeTask.id ? { ...task, status: newStatus! } : task
+    );
+    setTasks(updatedTasks);
+
     try {
-      const updatedTask = await updateTask(id, { status: newStatus });
+      const updatedTask = await updateTask(activeTask.id, { status: newStatus })
       setTasks((prevTasks) =>
-        prevTasks.map((task) => (task.id === id ? updatedTask : task))
+        prevTasks.map((task) =>
+          task.id  === activeTask.id ? { ...task, ...updatedTask } : task
+        )
       );
     } catch (error) {
       console.error("Error updating task status:", error);
+      setTasks(previousStatus);
     }
   };
 
+  // Define sensors for DndContext
+  const sensors = useSensors(
+    useSensor(PointerSensor)
+  );
+
   return (
-    <div className="mx-auto min-h-screen max-w-6xl bg-gray-100 p-10">
-      <h1 className="mb-8 text-3xl font-bold">TaskFlow Dashboard</h1>
+    <div className="mx-auto min-h-screen max-w-7xl bg-white p-8">
+      <h1 className="mb-8 text-3xl font-bold text-gray-900">
+        TaskFlow Dashboard
+      </h1>
 
       <TaskForm onCreateTask={handleCreateTask} />
+      
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragEnd={handleDragEnd}
+        >
+          <div className="grid  gap-6 lg:grid-cols-3">
+            <KanbanColumn
+              id="todo"
+              title="To Do"
+              tasks={todoTasks}
+              onDeleteTask={handleDeleteTask}
+            />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {tasks.map((task) => (
-          <div
-            key={task.id}
-            className="flex flex-col justify-between rounded-lg bg-white p-6 shadow transition hover:shadow-lg"
-          >
-            <div>
-              <h3 className="mb-2 text-lg font-semibold">{task.title}</h3>
+            <KanbanColumn
+              id="in_progress"
+              title="In Progress"
+              tasks={inProgressTasks}
+              onDeleteTask={handleDeleteTask}
+            />
 
-              <p className="mb-4 text-gray-600">{task.description}</p>
-
-              <div className="mb-3 flex items-center gap-2 text-sm">
-                <span
-                  className={`rounded px-2 py-1 text-xs font-medium ${
-                    task.status === "todo"
-                      ? "bg-gray-200 text-gray-700"
-                      : task.status === "in_progress"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-green-100 text-green-700"
-                  }`}
-                >
-                  {task.status.replaceAll("_", " ")}
-                </span>
-
-                <span
-                  className={`rounded px-2 py-1 text-xs font-medium ${
-                    task.priority === "high"
-                      ? "bg-red-100 text-red-700"
-                      : task.priority === "medium"
-                      ? "bg-purple-100 text-purple-700"
-                      : "bg-blue-100 text-blue-700"
-                  }`}
-                >
-                  {task.priority}
-                </span>
-              </div>
-
-              {task.due_date && (
-                <p className="mb-4 text-sm text-gray-500">Due: {task.due_date}</p>
-              )}
-            </div>
-
-            <div>
-              <div className="mb-4">
-                <label className="mb-1 block text-sm font-medium text-gray-700">
-                  Update Status
-                </label>
-
-                <select
-                  value={task.status}
-                  onChange={(e) =>
-                    handleStatusChange(
-                      task.id,
-                      e.target.value as "todo" | "in_progress" | "done"
-                    )
-                  }
-                  className="w-full rounded border border-gray-300 p-2"
-                >
-                  <option value="todo">To Do</option>
-                  <option value="in_progress">In Progress</option>
-                  <option value="done">Done</option>
-                </select>
-              </div>
-
-              <button
-                onClick={() => handleDeleteTask(task.id)}
-                className="mt-3 rounded bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-              >
-                Delete
-              </button>
-            </div>
+            <KanbanColumn
+              id="done"
+              title="Done"
+              tasks={doneTasks}
+              onDeleteTask={handleDeleteTask}
+            />
           </div>
-        ))}
-      </div>
+        </DndContext>
     </div>
   );
 }
