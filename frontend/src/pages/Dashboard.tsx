@@ -20,6 +20,16 @@ import {
 
 type TaskStatus = "todo" | "in_progress" | "done";
 
+const normalizeStatus = (status: string | null | undefined): TaskStatus => {
+  const value = (status || "").trim().toLowerCase();
+
+  if (value === "todo" || value === "to do") return "todo";
+  if (value === "in_progress" || value === "in progress") return "in_progress";
+  if (value === "done") return "done";
+
+  return "todo";
+};
+
 type Task = {
   id: number;
   title: string;
@@ -43,7 +53,11 @@ export default function Dashboard() {
   const loadTasks = async () => {
     try {
       const data = await fetchTasks();
-      setTasks(data);
+      const normalizedTasks = data.map((task: Task) => ({
+      ...task,
+      status: normalizeStatus(task.status),
+    }));
+      setTasks(normalizedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
     }
@@ -58,8 +72,8 @@ export default function Dashboard() {
     user_id?: number;
   }) => {
     try {
-      const newTask = await createTask(taskData);
-      setTasks((prevTasks) => [newTask, ...prevTasks]);
+      await createTask(taskData);
+      await loadTasks();
     } catch (error) {
       console.error("Error creating task:", error);
     }

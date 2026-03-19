@@ -14,7 +14,7 @@ type TaskFormProps = {
 export default function TaskForm({ onCreateTask }: TaskFormProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [status, setStatus] = useState("To Do");
+    const [status, setStatus] = useState("todo");
     const [priority, setPriority] = useState("Medium");
     const [dueDate, setDueDate] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,7 +35,7 @@ export default function TaskForm({ onCreateTask }: TaskFormProps) {
 
             setTitle("");
             setDescription("");
-            setStatus("To Do");
+            setStatus("todo");
             setPriority("Medium");
             setDueDate("");
         } catch (error) {
