@@ -13,24 +13,41 @@ type Task = {
 type TaskCardProps = {
     task: Task;
     onDeleteTask: (id: number) => void;
+    isOverlay?: boolean;
 };
 
-export default function TaskCard({ task, onDeleteTask }: TaskCardProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } = 
-        useSortable({ id: task.id.toString() });
+export default function TaskCard({
+    task,
+    onDeleteTask,
+    isOverlay = false
+  }: TaskCardProps) {
+    const sortable = useSortable({
+        id: task.id.toString(),
+        disabled: isOverlay
+    })
 
-    const style = {
+    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = 
+        sortable;
+
+    const style = isOverlay
+    ? undefined
+    :{
         transform: CSS.Transform.toString(transform),
         transition,
+        opacity: isDragging ? 0.35 : 1,
     };
+
+    const formattedStatus = task.status.replace(/_/g, " ");
 
     return (
         <div
-            ref={setNodeRef}
+            ref={isOverlay ? undefined : setNodeRef}
             style={style}
-            {...attributes}
-            {...listeners}
-            className="mb-4 cursor-grab rounded-lg bg-white  p-5 shadow transition hover:shadow-lg"
+            {...(!isOverlay ? attributes : {})}
+            {...(!isOverlay ? listeners : {})}
+            className={`mb-4 cursor-grab rounded-lg bg-white p-5 shadow transition hover:shadow-lg ${
+                isOverlay ? "rotate-1 shadow-2x1" : "cursor-grab active:cursor-grabbing"
+            }`}
         >
             <h3 className="mb-2 text-lg font-semibold">{task.title}</h3>
 

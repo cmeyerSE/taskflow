@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   DndContext,
+  DragOverlay,
   PointerSensor,
   closestCorners,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
-import type { DragEndEvent } from "@dnd-kit/core/dist/types";
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core/dist/types";
 import TaskForm from "../components/TaskForm";
 import KanbanColumn from "../components/KanbanColumn";
+import TaskCard from "../components/TaskCard";
 import {
   createTask,
   deleteTask,
@@ -29,6 +31,10 @@ type Task = {
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+
+  // Define sensors for DndContext
+  const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
     loadTasks();
@@ -84,8 +90,15 @@ export default function Dashboard() {
   const findTaskById = (id: string) =>
     tasks.find((task) => task.id.toString() === id);
 
+  const activeTask = activeTaskId ? findTaskById(activeTaskId) : null;
+
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveTaskId(String(event.active.id));
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
+    setActiveTaskId(null);
 
     if (!over) return;
     
@@ -109,10 +122,11 @@ export default function Dashboard() {
 
     const previousStatus = tasks;
 
-    const updatedTasks = tasks.map((task) =>
-      task.id === activeTask.id ? { ...task, status: newStatus! } : task
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === activeTask.id ? { ...task, status: newStatus as TaskStatus } : task
+      )
     );
-    setTasks(updatedTasks);
 
     try {
       const updatedTask = await updateTask(activeTask.id, { status: newStatus })
@@ -127,11 +141,6 @@ export default function Dashboard() {
     }
   };
 
-  // Define sensors for DndContext
-  const sensors = useSensors(
-    useSensor(PointerSensor)
-  );
-
   return (
     <div className="mx-auto min-h-screen max-w-7xl bg-white p-8">
       <h1 className="mb-8 text-3xl font-bold text-gray-900">
@@ -143,6 +152,7 @@ export default function Dashboard() {
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         >
           <div className="grid  gap-6 lg:grid-cols-3">
@@ -167,6 +177,18 @@ export default function Dashboard() {
               onDeleteTask={handleDeleteTask}
             />
           </div>
+
+          <DragOverlay>
+            {activeTask ? (
+              <div className="w-[3220px]">
+                <TaskCard
+                  task={activeTask}
+                  onDeleteTask={handleDeleteTask}
+                  isOverlay
+                />
+              </div>
+            ) : null}
+          </DragOverlay>
         </DndContext>
     </div>
   );
