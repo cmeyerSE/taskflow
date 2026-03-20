@@ -11,6 +11,7 @@ import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core/dist/types";
 import TaskForm from "../components/TaskForm";
 import KanbanColumn from "../components/KanbanColumn";
 import TaskCard from "../components/TaskCard";
+import EditTaskModal from "../components/EditTaskModal";
 import {
   createTask,
   deleteTask,
@@ -42,6 +43,8 @@ type Task = {
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   // Define sensors for DndContext
   const sensors = useSensors(useSensor(PointerSensor));
@@ -87,6 +90,36 @@ export default function Dashboard() {
       console.error("Error deleting task:", error);
     }
   };
+
+  const handleOpenEditModal = (task: Task) => {
+  setEditingTask(task);
+  setIsEditModalOpen(true);
+};
+
+const handleCloseEditModal = () => {
+  setEditingTask(null);
+  setIsEditModalOpen(false);
+};
+
+const handleSaveTask = async (
+  id: number,
+  updatedTaskData: {
+    title: string;
+    description: string;
+    priority: string;
+    due_date?: string;
+  }
+) => {
+  try {
+    const updatedTask = await updateTask(id, updatedTaskData);
+
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.id === id ? { ...task, ...updatedTask } : task))
+    );
+  } catch (error) {
+    console.error("Error saving task:", error);
+  }
+};
 
   const todoTasks = useMemo(
     () => tasks.filter((task) => task.status === "todo"),
@@ -175,6 +208,7 @@ export default function Dashboard() {
               title="To Do"
               tasks={todoTasks}
               onDeleteTask={handleDeleteTask}
+              onEditTask={handleOpenEditModal}
             />
 
             <KanbanColumn
@@ -182,6 +216,7 @@ export default function Dashboard() {
               title="In Progress"
               tasks={inProgressTasks}
               onDeleteTask={handleDeleteTask}
+              onEditTask={handleOpenEditModal}
             />
 
             <KanbanColumn
@@ -189,6 +224,7 @@ export default function Dashboard() {
               title="Done"
               tasks={doneTasks}
               onDeleteTask={handleDeleteTask}
+              onEditTask={handleOpenEditModal}
             />
           </div>
 
@@ -198,12 +234,20 @@ export default function Dashboard() {
                 <TaskCard
                   task={activeTask}
                   onDeleteTask={handleDeleteTask}
+                  onEditTask={handleOpenEditModal}
                   isOverlay
                 />
               </div>
             ) : null}
           </DragOverlay>
         </DndContext>
+
+        <EditTaskModal
+          task={editingTask}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSaveTask}
+        />
     </div>
   );
 }

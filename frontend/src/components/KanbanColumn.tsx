@@ -16,6 +16,7 @@ type KanbanColumnProps = {
     title: string;
     tasks: Task[];
     onDeleteTask: (id: number) => void;
+    onEditTask: (task: Task) => void;
 };
 
 export default function KanbanColumn({
@@ -23,6 +24,7 @@ export default function KanbanColumn({
     title,
     tasks,
     onDeleteTask,
+    onEditTask
 }: KanbanColumnProps) {
     const { setNodeRef } = useDroppable({ id });
 
@@ -37,7 +39,7 @@ export default function KanbanColumn({
 
             <div ref={setNodeRef} className="min-h-[200px]">
                 <SortableContext
-                items={tasks.map((ttask) => tasks.indexOf.toString())}
+                items={tasks.map((task) => tasks.indexOf.toString())}
                 strategy={verticalListSortingStrategy}
                 >
                     {tasks.map((task) => (
@@ -45,6 +47,7 @@ export default function KanbanColumn({
                             key={task.id}
                             task={task}
                             onDeleteTask={onDeleteTask}
+                            onEditTask={onEditTask}
                         />
                     ))}
                 </SortableContext>

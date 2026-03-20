@@ -14,12 +14,14 @@ type Task = {
 type TaskCardProps = {
     task: Task;
     onDeleteTask: (id: number) => void;
+    onEditTask: (task: Task) => void;
     isOverlay?: boolean;
 };
 
 export default function TaskCard({
     task,
     onDeleteTask,
+    onEditTask,
     isOverlay = false
   }: TaskCardProps) {
     const sortable = useSortable({
@@ -95,6 +97,14 @@ export default function TaskCard({
       {task.due_date && (
         <p className="mb-4 text-sm text-gray-500">Due: {task.due_date}</p>
       )}
+
+      <button
+        type="button"
+        onClick={() => onEditTask(task)}
+        className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+      >
+        Edit
+      </button>
 
       <button
         type="button"
