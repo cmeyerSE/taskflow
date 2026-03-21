@@ -31,6 +31,7 @@ const normalizeStatus = (status: string | null | undefined): TaskStatus => {
   return "todo";
 };
 
+
 type Task = {
   id: number;
   title: string;
@@ -45,6 +46,8 @@ export default function Dashboard() {
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // Define sensors for DndContext
   const sensors = useSensors(useSensor(PointerSensor));
@@ -55,6 +58,8 @@ export default function Dashboard() {
 
   const loadTasks = async () => {
     try {
+      setIsLoading(true);
+      setError("");
       const data = await fetchTasks();
       const normalizedTasks = data.map((task: Task) => ({
       ...task,
@@ -63,6 +68,9 @@ export default function Dashboard() {
       setTasks(normalizedTasks);
     } catch (error) {
       console.error("Error loading tasks:", error);
+      setError("Failed to load tasks. Please try again later.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -79,6 +87,7 @@ export default function Dashboard() {
       await loadTasks();
     } catch (error) {
       console.error("Error creating task:", error);
+      setError("Failed to create task.");
     }
   };
 
@@ -88,6 +97,7 @@ export default function Dashboard() {
       setTasks((prevTasks) => prevTasks.filter((task) => task.id !== id));
     } catch (error) {
       console.error("Error deleting task:", error);
+      setError("Failed to delete task.");
     }
   };
 
@@ -118,6 +128,7 @@ const handleSaveTask = async (
     );
   } catch (error) {
     console.error("Error saving task:", error);
+    setError("Failed to save tasks.");
   }
 };
 
@@ -196,51 +207,53 @@ const handleSaveTask = async (
 
       <TaskForm onCreateTask={handleCreateTask} />
       
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        >
-          <div className="grid  gap-6 lg:grid-cols-3">
-            <KanbanColumn
-              id="todo"
-              title="To Do"
-              tasks={todoTasks}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleOpenEditModal}
-            />
+      {!isLoading  && (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          >
+            <div className="grid  gap-6 lg:grid-cols-3">
+              <KanbanColumn
+                id="todo"
+                title="To Do"
+                tasks={todoTasks}
+                onDeleteTask={handleDeleteTask}
+                onEditTask={handleOpenEditModal}
+              />
 
-            <KanbanColumn
-              id="in_progress"
-              title="In Progress"
-              tasks={inProgressTasks}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleOpenEditModal}
-            />
+              <KanbanColumn
+                id="in_progress"
+                title="In Progress"
+                tasks={inProgressTasks}
+                onDeleteTask={handleDeleteTask}
+                onEditTask={handleOpenEditModal}
+              />
 
-            <KanbanColumn
-              id="done"
-              title="Done"
-              tasks={doneTasks}
-              onDeleteTask={handleDeleteTask}
-              onEditTask={handleOpenEditModal}
-            />
-          </div>
+              <KanbanColumn
+                id="done"
+                title="Done"
+                tasks={doneTasks}
+                onDeleteTask={handleDeleteTask}
+                onEditTask={handleOpenEditModal}
+              />
+            </div>
 
-          <DragOverlay>
-            {activeTask ? (
-              <div className="w-[3220px]">
-                <TaskCard
-                  task={activeTask}
-                  onDeleteTask={handleDeleteTask}
-                  onEditTask={handleOpenEditModal}
-                  isOverlay
-                />
-              </div>
-            ) : null}
-          </DragOverlay>
-        </DndContext>
+            <DragOverlay>
+              {activeTask ? (
+                <div className="w-[3220px]">
+                  <TaskCard
+                    task={activeTask}
+                    onDeleteTask={handleDeleteTask}
+                    onEditTask={handleOpenEditModal}
+                    isOverlay
+                  />
+                </div>
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+        )}
 
         <EditTaskModal
           task={editingTask}

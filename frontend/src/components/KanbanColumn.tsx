@@ -50,6 +50,12 @@ export default function KanbanColumn({
                             onEditTask={onEditTask}
                         />
                     ))}
+
+                    {tasks.length === 0 && (
+                        <div className="rounded-lg border border-dashed border-gray-300 bg-white/60 p-6 text-center text-sm text-gray-400">
+                            No tasks here yet
+                        </div>
+                    )}
                 </SortableContext>
             </div>
         </div>
