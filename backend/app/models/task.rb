@@ -1,4 +1,8 @@
 class Task < ApplicationRecord
+    belongs_to :user
+    
+    before_validation :normalize_status_and_priority
+
     validates :title, presence: true
     validates :status, presence: true
     validates :priority, presence: true
