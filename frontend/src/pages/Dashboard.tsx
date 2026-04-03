@@ -18,6 +18,7 @@ import {
   fetchTasks,
   updateTask,
 } from "../services/taskService";
+import { useAuth } from "../context/AuthContext";
 
 type TaskStatus = "todo" | "in_progress" | "done";
 
@@ -48,6 +49,7 @@ export default function Dashboard() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
+  const { user, logout } = useAuth();
 
   // Define sensors for DndContext
   const sensors = useSensors(useSensor(PointerSensor));
@@ -80,7 +82,6 @@ export default function Dashboard() {
     status: string;
     priority: string;
     due_date?: string;
-    user_id?: number;
   }) => {
     try {
       await createTask(taskData);
@@ -178,7 +179,7 @@ const handleSaveTask = async (
 
     if (!newStatus || activeTask.status === newStatus) return;
 
-    const previousStatus = tasks;
+    const previousTask = [...tasks];
 
     setTasks((currentTasks) =>
       currentTasks.map((task) =>
@@ -195,19 +196,47 @@ const handleSaveTask = async (
       );
     } catch (error) {
       console.error("Error updating task status:", error);
-      setTasks(previousStatus);
+      setTasks(previousTask);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error during logout:", error);
+      setError("Failed to log out. Please try again.");
     }
   };
 
   return (
     <div className="mx-auto min-h-screen max-w-7xl bg-white p-8">
-      <h1 className="mb-8 text-3xl font-bold text-gray-900">
-        TaskFlow Dashboard
-      </h1>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            TaskFlow Dashboard
+          </h1>
+          <p className="text-sm text-gray-500">{user?.email}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+        >
+          Log Out
+        </button>
+      </div>
 
       <TaskForm onCreateTask={handleCreateTask} />
       
       {!isLoading  && (
+        <div className="mt-6 text-gray-500">Loading tasks...</div>
+      )}
+
+      {error && (
+        <div className="mt-6 text-red-500">{error}</div>
+      )} {(
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -242,7 +271,7 @@ const handleSaveTask = async (
 
             <DragOverlay>
               {activeTask ? (
-                <div className="w-[3220px]">
+                <div className="w-[320px]">
                   <TaskCard
                     task={activeTask}
                     onDeleteTask={handleDeleteTask}
