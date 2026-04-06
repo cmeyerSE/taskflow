@@ -8,9 +8,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      get :csrf_token, to: "csrf#show"
+      get :current_user, to: "current_user#show"
       resources :tasks, only: [:index, :create, :update, :destroy]
-      
-      resource :current_user, only: [:show]
     end
   end
 end

@@ -1,4 +1,6 @@
-const API_URL = "http://localhost:3000/api/v1/tasks"
+import { getCsrfToken } from "./csrfService";
+import { API_BASE_URL } from "./apiConfig";
+const API_URL = `${API_BASE_URL}/api/v1/tasks`
 
 export const fetchTasks = async () => {
     const response = await fetch(API_URL, {
@@ -23,12 +25,14 @@ export const createTask = async (task: {
     priority: string;
     due_date?: string;
 }) => {
+    const csrfToken = await getCsrfToken();
     const response = await fetch(API_URL, {
         method: "POST",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({ task }),
     });
@@ -50,12 +54,14 @@ export const updateTask = async (
         due_date?: string;
     }
 ) => {
+    const csrfToken = await getCsrfToken();
     const response = await fetch(`${API_URL}/${id}`, {
         method: "PATCH",
         credentials: "include",
         headers: {
             "Content-Type": "application/json",
             Accept: "application/json",
+            "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({ task }),
     });
@@ -68,11 +74,13 @@ export const updateTask = async (
 };
 
 export const deleteTask = async (id: number) => {
+    const csrfToken = await getCsrfToken();
     const response = await fetch(`${API_URL}/${id}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
             Accept: "application/json",
+            "X-CSRF-Token": csrfToken,
         },
     });
 

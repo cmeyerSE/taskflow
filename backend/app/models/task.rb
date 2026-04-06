@@ -15,10 +15,12 @@ class Task < ApplicationRecord
 
         self.status =
             case status
-            when "to do"
+            when "to do", "to_do"
                 "todo"
             when "in progress"
                 "in_progress"
+            when "completed", "complete"
+                "done"
             when "", nil
                 "todo"
             else

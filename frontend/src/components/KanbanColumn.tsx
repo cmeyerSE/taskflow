@@ -39,7 +39,7 @@ export default function KanbanColumn({
 
             <div ref={setNodeRef} className="min-h-[200px]">
                 <SortableContext
-                items={tasks.map((task) => tasks.indexOf.toString())}
+                items={tasks.map((task) => task.id.toString())}
                 strategy={verticalListSortingStrategy}
                 >
                     {tasks.map((task) => (

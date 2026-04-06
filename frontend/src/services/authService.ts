@@ -1,11 +1,14 @@
-const API_BASE_URL = "http://localhost:3000";
+import { clearCsrfTokenCache, getCsrfToken } from "./csrfService";
+import { API_BASE_URL } from "./apiConfig";
 
 export const signup = async (email: string, password: string, passwordConfirmation: string) => {
+  const csrfToken = await getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/users`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
     },
     body: JSON.stringify({
       user: {
@@ -26,11 +29,13 @@ export const signup = async (email: string, password: string, passwordConfirmati
 };
 
 export const login = async (email: string, password: string) => {
+  const csrfToken = await getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/users/sign_in`, {
     method: "POST",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
     },
     body: JSON.stringify({
       user: {
@@ -50,18 +55,22 @@ export const login = async (email: string, password: string) => {
 };
 
 export const logout = async () => {
+  const csrfToken = await getCsrfToken();
   const response = await fetch(`${API_BASE_URL}/users/sign_out`, {
     method: "DELETE",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      "X-CSRF-Token": csrfToken,
     },
   });
 
   if (!response.ok) {
     throw new Error("Failed to log out");
   }
+
+  clearCsrfTokenCache();
 };
 
 export const fetchCurrentUser = async () => {

@@ -68,4 +68,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # Frontend and backend run on different localhost ports in development.
+  # Keep CSRF token verification enabled, but disable strict Origin matching.
+  config.action_controller.forgery_protection_origin_check = false
 end

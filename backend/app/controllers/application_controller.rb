@@ -1,4 +1,3 @@
-class ApplicationController < ActionController::API
-    include ActionController::Cookies
-    include Devise::Controllers::Helpers
+class ApplicationController < ActionController::Base
+    protect_from_forgery with: :exception
 end

@@ -25,9 +25,9 @@ type TaskStatus = "todo" | "in_progress" | "done";
 const normalizeStatus = (status: string | null | undefined): TaskStatus => {
   const value = (status || "").trim().toLowerCase();
 
-  if (value === "todo" || value === "to do") return "todo";
+  if (value === "todo" || value === "to do" || value === "to_do") return "todo";
   if (value === "in_progress" || value === "in progress") return "in_progress";
-  if (value === "done") return "done";
+  if (value === "done" || value === "completed" || value === "complete") return "done";
 
   return "todo";
 };
