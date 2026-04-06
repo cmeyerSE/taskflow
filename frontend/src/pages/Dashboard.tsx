@@ -44,6 +44,8 @@ type Task = {
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [priorityFilter, setPriorityFilter] = useState<"all" | "low" | "medium" | "high">("all");
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -133,17 +135,37 @@ const handleSaveTask = async (
   }
 };
 
+  const filteredTasks = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
+    return tasks.filter((task) => {
+      const normalizedPriority = (task.priority || "").toLowerCase();
+      const matchesPriority =
+        priorityFilter === "all" || normalizedPriority === priorityFilter;
+
+      if (!matchesPriority) return false;
+      if (!query) return true;
+
+      return (
+        task.title.toLowerCase().includes(query) ||
+        task.description.toLowerCase().includes(query) ||
+        task.status.toLowerCase().includes(query) ||
+        normalizedPriority.includes(query)
+      );
+    });
+  }, [tasks, searchQuery, priorityFilter]);
+
   const todoTasks = useMemo(
-    () => tasks.filter((task) => task.status === "todo"),
-    [tasks]
+    () => filteredTasks.filter((task) => task.status === "todo"),
+    [filteredTasks]
   );
   const inProgressTasks = useMemo(
-    () => tasks.filter((task) => task.status === "in_progress"),
-    [tasks]
+    () => filteredTasks.filter((task) => task.status === "in_progress"),
+    [filteredTasks]
   );
   const doneTasks = useMemo(
-    () => tasks.filter((task) => task.status === "done"),
-    [tasks]
+    () => filteredTasks.filter((task) => task.status === "done"),
+    [filteredTasks]
   );
 
   const findTaskById = (id: string) =>
@@ -229,8 +251,46 @@ const handleSaveTask = async (
       </div>
 
       <TaskForm onCreateTask={handleCreateTask} />
+
+      <div className="mb-6 grid gap-3 rounded-lg border bg-white p-4 md:grid-cols-[1fr_200px_auto]">
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Search by title, description, status, or priority"
+          className="rounded border p-3"
+        />
+
+        <select
+          value={priorityFilter}
+          onChange={(event) =>
+            setPriorityFilter(event.target.value as "all" | "low" | "medium" | "high")
+          }
+          className="rounded border p-3"
+        >
+          <option value="all">All priorities</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => {
+            setSearchQuery("");
+            setPriorityFilter("all");
+          }}
+          className="rounded border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Clear filters
+        </button>
+
+        <p className="text-sm text-gray-500 md:col-span-3">
+          Showing {filteredTasks.length} of {tasks.length} tasks
+        </p>
+      </div>
       
-      {!isLoading  && (
+      {isLoading && (
         <div className="mt-6 text-gray-500">Loading tasks...</div>
       )}
 
