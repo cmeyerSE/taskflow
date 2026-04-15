@@ -8,9 +8,9 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core/dist/types";
+import { snapCenterToCursor } from "@dnd-kit/modifiers";
 import TaskForm from "../components/TaskForm";
 import KanbanColumn from "../components/KanbanColumn";
-import TaskCard from "../components/TaskCard";
 import EditTaskModal from "../components/EditTaskModal";
 import {
   createTask,
@@ -334,15 +334,10 @@ const handleSaveTask = async (
               />
             </div>
 
-            <DragOverlay>
+            <DragOverlay modifiers={[snapCenterToCursor]}>
               {activeTask ? (
-                <div className="w-[calc(100vw-2rem)] max-w-[320px]">
-                  <TaskCard
-                    task={activeTask}
-                    onDeleteTask={handleDeleteTask}
-                    onEditTask={handleOpenEditModal}
-                    isOverlay
-                  />
+                <div className="rounded-md bg-white px-3 py-2 shadow-lg border border-gray-200 text-sm font-medium text-gray-700 max-w-[240px] truncate cursor-grabbing">
+                  {activeTask.title}
                 </div>
               ) : null}
             </DragOverlay>
