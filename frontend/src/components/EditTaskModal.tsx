@@ -44,7 +44,7 @@ export default function EditTaskModal({
 
   if (!isOpen || !task) return null;
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSaving(true);
 
@@ -71,7 +71,7 @@ export default function EditTaskModal({
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="-mr-2 p-2 text-gray-500 hover:text-gray-700"
           >
             ✕
           </button>
@@ -118,7 +118,7 @@ export default function EditTaskModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="rounded border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
             </button>
@@ -126,7 +126,7 @@ export default function EditTaskModal({
             <button
               type="submit"
               disabled={isSaving}
-              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              className="rounded bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
               {isSaving ? "Saving..." : "Save Changes"}
             </button>

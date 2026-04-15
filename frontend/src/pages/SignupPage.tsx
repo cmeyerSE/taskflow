@@ -13,7 +13,7 @@ export default function SignupPage({ onSwitchToLogin }: SignupPageProps) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     setIsSubmitting(true);
@@ -29,7 +29,7 @@ export default function SignupPage({ onSwitchToLogin }: SignupPageProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg">
+      <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-lg sm:p-8">
         <h1 className="mb-6 text-2xl font-bold text-gray-900">Create a TaskFlow account</h1>
 
         {error && (

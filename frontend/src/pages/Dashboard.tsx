@@ -37,7 +37,7 @@ type Task = {
   id: number;
   title: string;
   description: string;
-  status: string;
+  status: TaskStatus;
   priority: string;
   due_date?: string;
 };
@@ -54,7 +54,11 @@ export default function Dashboard() {
   const { user, logout } = useAuth();
 
   // Define sensors for DndContext
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 8 },
+    })
+  );
 
   useEffect(() => {
     loadTasks();
@@ -232,10 +236,10 @@ const handleSaveTask = async (
   };
 
   return (
-    <div className="mx-auto min-h-screen max-w-7xl bg-white p-8">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="mx-auto min-h-screen max-w-7xl bg-white p-4 sm:p-8">
+      <div className="mb-6 flex items-center justify-between sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
             TaskFlow Dashboard
           </h1>
           <p className="text-sm text-gray-500">{user?.email}</p>
@@ -244,7 +248,7 @@ const handleSaveTask = async (
         <button
           type="button"
           onClick={handleLogout}
-          className="rounded bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+          className="rounded bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800"
         >
           Log Out
         </button>
@@ -296,7 +300,8 @@ const handleSaveTask = async (
 
       {error && (
         <div className="mt-6 text-red-500">{error}</div>
-      )} {(
+      )}
+      {!isLoading && (
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -331,7 +336,7 @@ const handleSaveTask = async (
 
             <DragOverlay>
               {activeTask ? (
-                <div className="w-[320px]">
+                <div className="w-[calc(100vw-2rem)] max-w-[320px]">
                   <TaskCard
                     task={activeTask}
                     onDeleteTask={handleDeleteTask}

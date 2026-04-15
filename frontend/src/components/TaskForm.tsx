@@ -7,7 +7,6 @@ type TaskFormProps = {
         status: string;
         priority: string;
         due_date?: string;
-        user_id?: number;
     }) => Promise<void>;
 };
 
@@ -15,11 +14,11 @@ export default function TaskForm({ onCreateTask }: TaskFormProps) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [status, setStatus] = useState("todo");
-    const [priority, setPriority] = useState("Medium");
+    const [priority, setPriority] = useState("medium");
     const [dueDate, setDueDate] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         setIsSubmitting(true);
 
@@ -30,13 +29,12 @@ export default function TaskForm({ onCreateTask }: TaskFormProps) {
                 status,
                 priority,
                 due_date: dueDate || undefined,
-                user_id: 1,
             });
 
             setTitle("");
             setDescription("");
             setStatus("todo");
-            setPriority("Medium");
+            setPriority("medium");
             setDueDate("");
         } catch (error) {
             console.error("Error creating task:", error);
@@ -48,7 +46,7 @@ export default function TaskForm({ onCreateTask }: TaskFormProps) {
     return (
         <form
             onSubmit={handleSubmit}
-            className="bg-white rounded-lg shadow p-6 mb-6"
+            className="bg-white rounded-lg shadow p-4 mb-6 sm:p-6"
         >
             <h2 className="text-xl font-semibold mb-4">Create New Task</h2>
 
@@ -100,7 +98,7 @@ export default function TaskForm({ onCreateTask }: TaskFormProps) {
             <button
                 type="submit"
                 disabled={isSubmitting}
-                className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition disabled:opacity-50"
+                className="mt-4 w-full bg-blue-500 text-white px-4 py-3 rounded hover:bg-blue-600 transition disabled:opacity-50 sm:w-auto"
             >   
                 {isSubmitting ? "Creating..." : "Create Task"}
             </button>

@@ -6,7 +6,7 @@ type Task  = {
     id: number;
     title: string;
     description: string;
-    status: string;
+    status: "todo" | "in_progress" | "done";
     priority: string;
     due_date?: string;
 };
@@ -30,7 +30,7 @@ export default function KanbanColumn({
 
     return (
         <div className="rounded-xl bg-gray-100 p-4">
-            <div className="mb-4 flex items--center justify-between">
+            <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-lg font-semibold">{title}</h2>
                 <span className="rounded-full bg-white px-3 py-1 text-sm text-gray-600 shadow">
                     {tasks.length}

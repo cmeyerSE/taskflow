@@ -56,12 +56,12 @@ export default function TaskCard({
         {!isOverlay && (
           <button
             type="button"
-            className="cursor-grab rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 active:cursor-grabbing"
+            className="cursor-grab rounded p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600 active:cursor-grabbing"
             {...attributes}
             {...listeners}
             aria-label="Drag task"
           >
-            <GripVertical size={18} />
+            <GripVertical size={20} />
           </button>
         )}
       </div>
@@ -98,21 +98,23 @@ export default function TaskCard({
         <p className="mb-4 text-sm text-gray-500">Due: {task.due_date}</p>
       )}
 
-      <button
-        type="button"
-        onClick={() => onEditTask(task)}
-        className="rounded bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
-      >
-        Edit
-      </button>
+      <div className="mt-4 flex gap-2">
+        <button
+          type="button"
+          onClick={() => onEditTask(task)}
+          className="flex-1 rounded bg-blue-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-600"
+        >
+          Edit
+        </button>
 
-      <button
-        type="button"
-        onClick={() => onDeleteTask(task.id)}
-        className="mt-2 rounded bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600"
-      >
-        Delete
-      </button>
+        <button
+          type="button"
+          onClick={() => onDeleteTask(task.id)}
+          className="flex-1 rounded bg-red-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-red-600"
+        >
+          Delete
+        </button>
+      </div>
     </div>
   );
 }
