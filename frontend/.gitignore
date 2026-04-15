@@ -1,3 +1,8 @@
+# Environment files (keep .env.example but ignore everything else)
+.env
+.env.*
+!.env.example
+
 # Logs
 logs
 *.log

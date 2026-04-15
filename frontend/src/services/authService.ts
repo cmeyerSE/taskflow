@@ -35,6 +35,7 @@ export const login = async (email: string, password: string) => {
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
+      Accept: "application/json",
       "X-CSRF-Token": csrfToken,
     },
     body: JSON.stringify({
@@ -48,8 +49,12 @@ export const login = async (email: string, password: string) => {
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || "Failed to log in");
+    throw new Error(data.error || data.message || "Failed to log in");
   }
+
+  // Devise rotates the session on sign-in, so clear the cached CSRF token
+  // to force a fresh fetch on the next state-changing request.
+  clearCsrfTokenCache();
 
   return data;
 };
